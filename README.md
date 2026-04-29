@@ -1,94 +1,81 @@
-\section{QuickChat AI - RAG Based Chatbot}
+<div align="center">
 
-\subsection{Overview}
-QuickChat AI is a Streamlit-based chatbot that combines:
+# ⚡ QuickChat AI  
+### Smart RAG Based Chatbot with Live Search
 
-\begin{itemize}
-\item \textbf{PDF Question Answering} using RAG (Retrieval Augmented Generation)
-\item \textbf{Live Google Search} for latest information
-\item \textbf{Conversation Memory}
-\item \textbf{LLM Powered Responses} using Groq Llama Model
-\end{itemize}
+<img src="https://img.shields.io/badge/Python-3.13-blue?style=for-the-badge&logo=python">
+<img src="https://img.shields.io/badge/Streamlit-App-red?style=for-the-badge&logo=streamlit">
+<img src="https://img.shields.io/badge/LangChain-AI-green?style=for-the-badge">
+<img src="https://img.shields.io/badge/Groq-LLM-black?style=for-the-badge">
 
-\subsection{Tech Stack}
+</div>
 
-\begin{itemize}
-\item Python
-\item Streamlit
-\item LangChain
-\item LangGraph
-\item Groq API
-\item ChromaDB
-\item HuggingFace Embeddings
-\end{itemize}
+---
 
-\subsection{Features}
+## 🌟 About Project
 
-\begin{enumerate}
-\item Upload PDF files
-\item Ask questions from uploaded PDF
-\item Search real-time information from Google
-\item Chat history memory
-\item Fast responses using Groq LLM
-\end{enumerate}
+QuickChat AI is an advanced chatbot that can:
 
-\subsection{Main Libraries Used}
+✨ Answer questions from uploaded PDF files  
+🌐 Search latest information from Google  
+🧠 Remember conversation context  
+⚡ Give lightning fast AI responses  
 
-\begin{verbatim}
-streamlit
-langchain
-langgraph
-langchain_groq
-langchain_chroma
-langchain_huggingface
-python-dotenv
-\end{verbatim}
+---
 
-\subsection{Workflow}
+## 🚀 Features
 
-\begin{enumerate}
-\item User uploads PDF
-\item PDF converted into chunks
-\item Embeddings generated using MiniLM model
-\item Stored in Chroma Vector DB
-\item Retriever fetches relevant chunks
-\item LLM answers using context
-\item For current topics, Google Search tool is used
-\end{enumerate}
+✅ PDF Upload & Chat  
+✅ RAG (Retrieval Augmented Generation)  
+✅ Live Search Tool  
+✅ Memory Based Chat  
+✅ Fast Groq LLM Responses  
+✅ Clean Streamlit UI  
 
-\subsection{LLM Configuration}
+---
 
-\begin{verbatim}
-Model = llama-3.3-70b-versatile
-Temperature = 0.3
-\end{verbatim}
+## 🛠️ Tech Stack
 
-\subsection{RAG Pipeline}
+| Technology | Usage |
+|-----------|-------|
+| Python | Backend |
+| Streamlit | Frontend UI |
+| LangChain | AI Workflow |
+| LangGraph | Memory |
+| ChromaDB | Vector Database |
+| HuggingFace | Embeddings |
+| Groq API | LLM |
 
-\begin{verbatim}
-PDF -> Text Splitter -> Embeddings -> Chroma DB -> Retriever -> LLM
-\end{verbatim}
+---
 
-\subsection{Agent Tools}
+## ⚙️ How It Works
 
-\begin{itemize}
-\item rag\_tool : Search uploaded PDF
-\item google\_search : Search latest/current info
-\end{itemize}
+```text
+Upload PDF
+   ↓
+Split into Chunks
+   ↓
+Create Embeddings
+   ↓
+Store in ChromaDB
+   ↓
+Retrieve Relevant Data
+   ↓
+Answer with LLM
+``` id="qj2hm2"
 
-\subsection{Run Project}
+---
 
-\begin{verbatim}
-streamlit run app.py
-\end{verbatim}
+## 🤖 Model Used
 
-\subsection{Environment Variables}
+```text id="g4ykj6"
+llama-3.3-70b-versatile
 
-\begin{verbatim}
-GROQ_API_KEY=your_key
-SERPER_API_KEY=your_key
-\end{verbatim}
+📂 Project Structure
+QuickChat-AI/
+│── app.py
+│── requirements.txt
+│── .env
+│── README.md
 
-\subsection{Author}
 
-Disha Panjla
