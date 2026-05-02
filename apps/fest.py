@@ -16,15 +16,32 @@ from langchain_core.tools import tool
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
 
-
+# ---------------- PAGE ----------------
 st.set_page_config(page_title="QuickChat AI", page_icon="⚡")
 
 
-llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    temperature=0.3
-)
 
+search = GoogleSerperAPIWrapper()
+    
+
+
+
+
+# ---------------- PROMPT ----------------
+system_prompt = """
+You are an advanced AI assistant.
+
+Rules:
+- Answer general questions clearly and concisely
+- If the question is about a document, use the provided context
+- If the question requires current or real-time information, respond based on available knowledge
+- If unsure, say so honestly
+- Do not mention tools or internal logic
+"""
+# ---------------- LLM ----------------
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile" , temperature=0.3
+)
 
 if "history" not in st.session_state:
     st.session_state.history = []
@@ -32,10 +49,15 @@ if "history" not in st.session_state:
 if "memory" not in st.session_state:
     st.session_state.memory = MemorySaver()
 
-if "agent" not in st.session_state:
-    st.session_state.agent = None
+if "agent" not in st.session_state or st.session_state.agent is None:
+    st.session_state.agent = create_agent(
+        model=llm,
+        tools=[search.run],  # always available
+        checkpointer=st.session_state.memory,
+        system_prompt=system_prompt
+    )
 
-
+# ---------------- PDF PROCESS ----------------
 def ingest_pdf(uploaded_file):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.read())
@@ -59,17 +81,12 @@ def ingest_pdf(uploaded_file):
     return db
 
 
-
+# ---------------- TOOLS ----------------
 def create_rag_tool(retriever):
 
     @tool
     def rag_tool(query: str) -> str:
-        """
-        Search uploaded PDF documents.
-        """
-        if retriever is None:
-            return "No document uploaded."
-
+        """Search uploaded PDF documents."""
         docs = retriever.invoke(query)
 
         if not docs:
@@ -80,49 +97,14 @@ def create_rag_tool(retriever):
     return rag_tool
 
 
-@tool
-def google_search(query: str) -> str:
-    """
-    Search Google when question needs latest/current info.
-    """
-    search = GoogleSerperAPIWrapper()
-    return search.run(query)
 
 
 
-system_prompt = """
-You are an advanced AI assistant.
 
-You have two tools:
-
-1. rag_tool
-Use when user asks about uploaded PDF/document.
-
-2. google_search
-Use when user asks:
-- latest news
-- current affairs
-- live scores
-- recent events
-- real-time facts
-
-Rules:
-1. Think carefully.
-2. If general question → answer directly.
-3. If document question → use rag_tool.
-4. If current info → use google_search.
-5. Do not use tools unnecessarily.
-6. Give clean final answer.
-7. If tool fails, say clearly.
-"""
-
-
+# ---------------- RUN ----------------
 def run_agent(query):
 
-    agent = st.session_state.get("agent")
-
-    if agent is None:
-        return "⚠️ Please upload a PDF first."
+    agent = st.session_state.agent
 
     response = agent.invoke(
         {
@@ -140,10 +122,10 @@ def run_agent(query):
     return response["messages"][-1].content
 
 
-
+# ---------------- UI ----------------
 st.subheader("⚡ QuickChat AI")
 
-
+# -------- SIDEBAR --------
 with st.sidebar:
     st.header("📄 Upload PDF")
 
@@ -152,24 +134,25 @@ with st.sidebar:
     if file:
         with st.spinner("Processing PDF..."):
             db = ingest_pdf(file)
-
             retriever = db.as_retriever(search_kwargs={"k": 3})
 
-            # ✅ BUILD AGENT HERE (IMPORTANT FIX)
+            # ✅ DYNAMIC TOOL SET
+            tools = [search.run, create_rag_tool(retriever)]
+
             st.session_state.agent = create_agent(
                 model=llm,
-                tools=[create_rag_tool(retriever), google_search],
+                tools=tools,
                 checkpointer=st.session_state.memory,
                 system_prompt=system_prompt
             )
 
         st.success("PDF Ready!")
 
-
+# -------- CHAT HISTORY --------
 for msg in st.session_state.history:
     st.chat_message(msg["role"]).markdown(msg["content"])
 
-
+# -------- INPUT --------
 query = st.chat_input("Ask Anything...")
 
 if query:
