@@ -4,6 +4,7 @@ load_dotenv()
 import os
 import tempfile
 import streamlit as st
+import base64
 
 from langchain_groq import ChatGroq
 from langchain_community.utilities import GoogleSerperAPIWrapper
@@ -16,18 +17,87 @@ from langchain_core.tools import tool
 from langchain.agents import create_agent
 from langgraph.checkpoint.memory import MemorySaver
 
-# ---------------- PAGE ----------------
-st.set_page_config(page_title="QuickChat AI", page_icon="⚡")
+# -- PAGE --
+st.set_page_config(
+    page_title="Arni AI",
+    page_icon="logo.jpeg",
+    layout="wide"
+)
 
+# Move content upward
+st.markdown("""
+<style>
+.block-container{
+    padding-top:1rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
+## ===== HEADER =====
+
+st.markdown("""
+<div style="
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-top:10px;
+    margin-bottom:10px;
+">
+""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([2,1,2])
+
+with col2:
+    st.markdown("""
+    <style>
+    [data-testid="stImage"] img {
+        border: 3px solid #d4af37;
+        border-radius: 15px;
+        padding: 5px;
+        box-shadow: 0 0 10px rgba(212,175,55,0.5);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.image("logo.jpeg", width=120)
+
+st.markdown("""
+<div style="
+    text-align:center;
+    border:2px solid #d4af37;
+    border-radius:10px;
+    padding:15px 40px;
+    width:350px;
+    margin:auto;
+">
+    <h1 style="
+        color:white;
+        margin:0;
+        font-size:32px;
+    ">
+        ⚡ ARNI AI ⚡
+    </h1>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="
+    text-align:center;
+    color:white;
+    font-size:20px;
+    margin-top:12px;
+">
+──────── Your Intelligent AI Assistant ────────
+</div>
+""", unsafe_allow_html=True)
 
 search = GoogleSerperAPIWrapper()
-    
 
 
 
 
-# ---------------- PROMPT ----------------
+# -- PROMPT --
 system_prompt = """
 You are an advanced AI assistant.
 
@@ -38,9 +108,9 @@ Rules:
 - If unsure, say so honestly
 - Do not mention tools or internal logic
 """
-# ---------------- LLM ----------------
+# -- LLM --
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile" , temperature=0.3
+    model="llama-3.3-70b-versatile" , 
 )
 
 if "history" not in st.session_state:
@@ -57,7 +127,7 @@ if "agent" not in st.session_state or st.session_state.agent is None:
         system_prompt=system_prompt
     )
 
-# ---------------- PDF PROCESS ----------------
+# -- PDF PROCESS --
 def ingest_pdf(uploaded_file):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.read())
@@ -81,7 +151,7 @@ def ingest_pdf(uploaded_file):
     return db
 
 
-# ---------------- TOOLS ----------------
+# -- TOOLS --
 def create_rag_tool(retriever):
 
     @tool
@@ -101,7 +171,7 @@ def create_rag_tool(retriever):
 
 
 
-# ---------------- RUN ----------------
+# -- RUN --
 def run_agent(query):
 
     agent = st.session_state.agent
@@ -122,10 +192,9 @@ def run_agent(query):
     return response["messages"][-1].content
 
 
-# ---------------- UI ----------------
-st.subheader("⚡ QuickChat AI")
 
-# -------- SIDEBAR --------
+
+# -- SIDEBAR --
 with st.sidebar:
     st.header("📄 Upload PDF")
 
@@ -148,11 +217,11 @@ with st.sidebar:
 
         st.success("PDF Ready!")
 
-# -------- CHAT HISTORY --------
+# -- CHAT HISTORY --
 for msg in st.session_state.history:
     st.chat_message(msg["role"]).markdown(msg["content"])
 
-# -------- INPUT --------
+# -- INPUT --
 query = st.chat_input("Ask Anything...")
 
 if query:
